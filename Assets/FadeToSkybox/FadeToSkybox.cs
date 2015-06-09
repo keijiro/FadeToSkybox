@@ -71,9 +71,7 @@ class FadeToSkybox : UnityStandardAssets.ImageEffects.PostEffectsBase
         frustumCorners.SetRow (2, bottomRight);
         frustumCorners.SetRow (3, bottomLeft);
 
-        var camPos= camtr.position;
         fogMaterial.SetMatrix ("_FrustumCornersWS", frustumCorners);
-        fogMaterial.SetVector ("_CameraWS", camPos);
         fogMaterial.SetFloat ("_DistanceOffset", Mathf.Max(startDistance, 0.0f));
 
         var sceneMode= RenderSettings.fogMode;
@@ -113,10 +111,10 @@ class FadeToSkybox : UnityStandardAssets.ImageEffects.PostEffectsBase
 
         // Transfer the skybox parameters.
         var skybox = RenderSettings.skybox;
-        fogMaterial.SetColor ("_SkyTint", skybox.GetColor("_Tint"));
-        fogMaterial.SetFloat ("_SkyExposure", skybox.GetFloat("_Exposure"));
+        fogMaterial.SetTexture("_SkyCubemap", skybox.GetTexture("_Tex"));
+        fogMaterial.SetColor("_SkyTint", skybox.GetColor("_Tint"));
+        fogMaterial.SetFloat("_SkyExposure", skybox.GetFloat("_Exposure"));
         fogMaterial.SetFloat ("_SkyRotation", skybox.GetFloat("_Rotation"));
-        fogMaterial.SetTexture ("_SkyCubemap", skybox.GetTexture("_Tex"));
 
         CustomGraphicsBlit (source, destination, fogMaterial, 0);
     }

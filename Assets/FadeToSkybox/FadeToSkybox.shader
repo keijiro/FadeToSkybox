@@ -24,78 +24,82 @@ Shader "Hidden/FadeToSkybox"
     float4 _SceneFogParams;
 
     // for fast world space reconstruction
-    uniform float4x4 _FrustumCornersWS;
-    uniform float4 _CameraWS;
+    float4x4 _FrustumCornersWS;
 
+    // Skybox information
     samplerCUBE _SkyCubemap;
     half4 _SkyCubemap_HDR;
-
     half4 _SkyTint;
     half _SkyExposure;
     float _SkyRotation;
 
-    float4 RotateAroundYInDegrees (float4 vertex, float degrees)
+    struct v2f
     {
-        float alpha = degrees * UNITY_PI / 180.0;
-        float sina, cosa;
-        sincos(alpha, sina, cosa);
-        float2x2 m = float2x2(cosa, -sina, sina, cosa);
-        return float4(mul(m, vertex.xz), vertex.yw).xzyw;
-    }
-
-    struct v2f {
         float4 pos : SV_POSITION;
         float2 uv : TEXCOORD0;
         float2 uv_depth : TEXCOORD1;
         float4 interpolatedRay : TEXCOORD2;
     };
 
-    v2f vert (appdata_img v)
+    float4 RotateAroundYAxis(float4 v, float deg)
     {
-        v2f o;
+        float alpha = deg * UNITY_PI / 180.0;
+        float sina, cosa;
+        sincos(alpha, sina, cosa);
+        float2x2 m = float2x2(cosa, -sina, sina, cosa);
+        return float4(mul(m, v.xz), v.yw).xzyw;
+    }
+
+    v2f vert(appdata_img v)
+    {
         half index = v.vertex.z;
+
+        v2f o;
+
         v.vertex.z = 0.1;
         o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
         o.uv = v.texcoord.xy;
         o.uv_depth = v.texcoord.xy;
 
-        #if UNITY_UV_STARTS_AT_TOP
-        if (_MainTex_TexelSize.y < 0)
-            o.uv.y = 1-o.uv.y;
-        #endif
+    #if UNITY_UV_STARTS_AT_TOP
+        if (_MainTex_TexelSize.y < 0.0) o.uv.y = 1.0 - o.uv.y;
+    #endif
 
-        o.interpolatedRay = RotateAroundYInDegrees(_FrustumCornersWS[(int)index], -_SkyRotation);
+        o.interpolatedRay = _FrustumCornersWS[(int)index];
+        o.interpolatedRay = RotateAroundYAxis(o.interpolatedRay, -_SkyRotation);
         o.interpolatedRay.w = index;
 
         return o;
     }
 
     // Applies one of standard fog formulas, given fog coordinate (i.e. distance)
-    half ComputeFogFactor (float coord)
+    half ComputeFogFactor(float coord)
     {
-        float fogFac = 0.0;
-        #if FOG_LINEAR
+        float fog = 0.0;
+    #if FOG_LINEAR
         // factor = (end-z)/(end-start) = z * (-1/(end-start)) + (end/(end-start))
-        fogFac = coord * _SceneFogParams.z + _SceneFogParams.w;
-        #elif FOG_EXP
+        fog = coord * _SceneFogParams.z + _SceneFogParams.w;
+    #elif FOG_EXP
         // factor = exp(-density*z)
-        fogFac = _SceneFogParams.y * coord; fogFac = exp2(-fogFac);
-        #else // FOG_EXP2
+        fog = _SceneFogParams.y * coord;
+        fog = exp2(-fog);
+    #else // FOG_EXP2
         // factor = exp(-(density*z)^2)
-        fogFac = _SceneFogParams.x * coord; fogFac = exp2(-fogFac*fogFac);
-        #endif
-        return saturate(fogFac);
+        fog = _SceneFogParams.x * coord;
+        fog = exp2(-fog * fog);
+    #endif
+        return saturate(fog);
     }
 
     // Distance-based fog
-    float ComputeDistance (float3 camDir, float zdepth)
+    float ComputeDistance(float3 camDir, float zdepth)
     {
         float dist;
-        #if RADIAL_DIST
+    #if RADIAL_DIST
         dist = length(camDir);
-        #else // Z_DIST
+    #else // Z_DIST
         dist = zdepth * _ProjectionParams.z;
-        #endif
+    #endif
         // Built-in fog starts at near plane, so match that by
         // subtracting the near value. Not a perfect approximation
         // if near plane is very large, but good enough.
@@ -107,30 +111,20 @@ Shader "Hidden/FadeToSkybox"
     {
         half4 sceneColor = tex2D(_MainTex, i.uv);
 
-        // Reconstruct world space position & direction
-        // towards this screen pixel.
-        float rawDepth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture,i.uv_depth);
-        float dpth = Linear01Depth(rawDepth);
-        float4 wsDir = dpth * i.interpolatedRay;
-        float4 wsPos = _CameraWS + wsDir;
+        // Reconstruct world space position & direction towards this screen pixel.
+        float depth = Linear01Depth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uv_depth));
+        float4 wsDir = depth * i.interpolatedRay;
 
-        half4 skyTex = texCUBE (_SkyCubemap, wsDir);
-        half3 skyColor = DecodeHDR (skyTex, _SkyCubemap_HDR);
-        skyColor *= _SkyTint.rgb * unity_ColorSpaceDouble;
-        skyColor *= _SkyExposure;
+        // Look up the skybox color.
+        half3 skyColor = DecodeHDR(texCUBE(_SkyCubemap, wsDir.xyz), _SkyCubemap_HDR);
+        skyColor *= _SkyTint.rgb * _SkyExposure * unity_ColorSpaceDouble;
 
-        // Compute fog distance
-        float g = ComputeDistance(wsDir, dpth) - _DistanceOffset;
+        // Compute fog amount.
+        float g = ComputeDistance(wsDir, depth) - _DistanceOffset;
+        half fog = ComputeFogFactor(max(0.0, g));
 
-        // Compute fog amount
-        half fogFac = ComputeFogFactor (max(0.0,g));
-        // Do not fog skybox
-        if (rawDepth >= 0.999999)
-            fogFac = 1.0;
-
-        // Lerp between fog color & original scene color
-        // by fog amount
-        return lerp (half4(skyColor, 1), sceneColor, fogFac);
+        // Lerp between skybox color to fog color with fog amount.
+        return lerp(half4(skyColor, 1), sceneColor, fog);
     }
 
     ENDCG
