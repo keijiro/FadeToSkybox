@@ -12,13 +12,15 @@ Shader "Hidden/FadeToSkybox"
 
     #include "UnityCG.cginc"
 
+    #pragma multi_compile FOG_LINEAR FOG_EXP FOG_EXP2
+    #pragma multi_compile Z_DIST RADIAL_DIST
+
     sampler2D _MainTex;
     float4 _MainTex_TexelSize;
 
     sampler2D_float _CameraDepthTexture;
 
     float _DistanceOffset;
-    int4 _SceneFogMode; // x = fog mode, y = use radial flag
     float4 _SceneFogParams;
 
     // for fast world space reconstruction
@@ -72,21 +74,16 @@ Shader "Hidden/FadeToSkybox"
     half ComputeFogFactor (float coord)
     {
         float fogFac = 0.0;
-        if (_SceneFogMode.x == 1) // linear
-        {
-            // factor = (end-z)/(end-start) = z * (-1/(end-start)) + (end/(end-start))
-            fogFac = coord * _SceneFogParams.z + _SceneFogParams.w;
-        }
-        if (_SceneFogMode.x == 2) // exp
-        {
-            // factor = exp(-density*z)
-            fogFac = _SceneFogParams.y * coord; fogFac = exp2(-fogFac);
-        }
-        if (_SceneFogMode.x == 3) // exp2
-        {
-            // factor = exp(-(density*z)^2)
-            fogFac = _SceneFogParams.x * coord; fogFac = exp2(-fogFac*fogFac);
-        }
+        #if FOG_LINEAR
+        // factor = (end-z)/(end-start) = z * (-1/(end-start)) + (end/(end-start))
+        fogFac = coord * _SceneFogParams.z + _SceneFogParams.w;
+        #elif FOG_EXP
+        // factor = exp(-density*z)
+        fogFac = _SceneFogParams.y * coord; fogFac = exp2(-fogFac);
+        #else // FOG_EXP2
+        // factor = exp(-(density*z)^2)
+        fogFac = _SceneFogParams.x * coord; fogFac = exp2(-fogFac*fogFac);
+        #endif
         return saturate(fogFac);
     }
 
@@ -94,10 +91,11 @@ Shader "Hidden/FadeToSkybox"
     float ComputeDistance (float3 camDir, float zdepth)
     {
         float dist;
-        if (_SceneFogMode.y == 1)
-            dist = length(camDir);
-        else
-            dist = zdepth * _ProjectionParams.z;
+        #if RADIAL_DIST
+        dist = length(camDir);
+        #else // Z_DIST
+        dist = zdepth * _ProjectionParams.z;
+        #endif
         // Built-in fog starts at near plane, so match that by
         // subtracting the near value. Not a perfect approximation
         // if near plane is very large, but good enough.

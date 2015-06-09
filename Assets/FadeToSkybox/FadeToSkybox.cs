@@ -89,7 +89,27 @@ class FadeToSkybox : UnityStandardAssets.ImageEffects.PostEffectsBase
         sceneParams.z = linear ? -invDiff : 0.0f;
         sceneParams.w = linear ? sceneEnd * invDiff : 0.0f;
         fogMaterial.SetVector ("_SceneFogParams", sceneParams);
-        fogMaterial.SetVector ("_SceneFogMode", new Vector4((int)sceneMode, useRadialDistance ? 1 : 0, 0, 0));
+
+        if (sceneMode == FogMode.Linear)
+        {
+            fogMaterial.DisableKeyword("FOG_EXP");
+            fogMaterial.DisableKeyword("FOG_EXP2");
+        }
+        else if (sceneMode == FogMode.Exponential)
+        {
+            fogMaterial.EnableKeyword("FOG_EXP");
+            fogMaterial.DisableKeyword("FOG_EXP2");
+        }
+        else // Exp2
+        {
+            fogMaterial.DisableKeyword("FOG_EXP");
+            fogMaterial.EnableKeyword("FOG_EXP2");
+        }
+
+        if (useRadialDistance)
+            fogMaterial.EnableKeyword("RADIAL_DIST");
+        else
+            fogMaterial.DisableKeyword("RADIAL_DIST");
 
         var skybox = RenderSettings.skybox;
         fogMaterial.SetColor ("_Tint", skybox.GetColor("_Tint"));
