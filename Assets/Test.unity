@@ -18,7 +18,7 @@ RenderSettings:
   m_FogColor: {r: .34117648, g: .321568638, b: .309803933, a: 1}
   m_FogMode: 2
   m_FogDensity: .0799999982
-  m_LinearFogStart: 15.6999998
+  m_LinearFogStart: 0
   m_LinearFogEnd: 80
   m_AmbientSkyColor: {r: .211999997, g: .226999998, b: .259000003, a: 1}
   m_AmbientEquatorColor: {r: .114, g: .125, b: .133000001, a: 1}
@@ -158,7 +158,7 @@ Camera:
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
   m_HDR: 0
-  m_OcclusionCulling: 1
+  m_OcclusionCulling: 0
   m_StereoConvergence: 10
   m_StereoSeparation: .0219999999
   m_StereoMirrorMode: 0
