@@ -6,16 +6,8 @@ using UnityEngine;
 [AddComponentMenu ("Image Effects/Rendering/Fade To Skybox")]
 class FadeToSkybox : UnityStandardAssets.ImageEffects.PostEffectsBase
 {
-    [Tooltip("Apply distance-based fog?")]
-    public bool  distanceFog = true;
     [Tooltip("Distance fog is based on radial distance from camera when checked")]
     public bool  useRadialDistance = false;
-    [Tooltip("Apply height-based fog?")]
-    public bool  heightFog = true;
-    [Tooltip("Fog top Y coordinate")]
-    public float height = 1.0f;
-    [Range(0.001f,10.0f)]
-    public float heightDensity = 2.0f;
     [Tooltip("Push fog away from the camera by this amount")]
     public float startDistance = 0.0f;
 
@@ -37,8 +29,7 @@ class FadeToSkybox : UnityStandardAssets.ImageEffects.PostEffectsBase
     [ImageEffectOpaque]
     void OnRenderImage (RenderTexture source, RenderTexture destination)
     {
-        if (CheckResources()==false || (!distanceFog && !heightFog))
-        {
+        if (!CheckResources()) {
             Graphics.Blit (source, destination);
             return;
         }
@@ -81,11 +72,8 @@ class FadeToSkybox : UnityStandardAssets.ImageEffects.PostEffectsBase
         frustumCorners.SetRow (3, bottomLeft);
 
         var camPos= camtr.position;
-        float FdotC = camPos.y-height;
-        float paramK = (FdotC <= 0.0f ? 1.0f : 0.0f);
         fogMaterial.SetMatrix ("_FrustumCornersWS", frustumCorners);
         fogMaterial.SetVector ("_CameraWS", camPos);
-        fogMaterial.SetVector ("_HeightParams", new Vector4 (height, FdotC, paramK, heightDensity*0.5f));
         fogMaterial.SetVector ("_DistanceParams", new Vector4 (-Mathf.Max(startDistance,0.0f), 0, 0, 0));
 
         var sceneMode= RenderSettings.fogMode;
@@ -109,15 +97,7 @@ class FadeToSkybox : UnityStandardAssets.ImageEffects.PostEffectsBase
         fogMaterial.SetFloat ("_Rotation", skybox.GetFloat("_Rotation"));
         fogMaterial.SetTexture ("_Cubemap", skybox.GetTexture("_Tex"));
 
-        int pass = 0;
-        if (distanceFog && heightFog)
-            pass = 0; // distance + height
-        else if (distanceFog)
-            pass = 1; // distance only
-        else
-            pass = 2; // height only
-
-        CustomGraphicsBlit (source, destination, fogMaterial, pass);
+        CustomGraphicsBlit (source, destination, fogMaterial, 0);
     }
 
     static void CustomGraphicsBlit (RenderTexture source, RenderTexture dest, Material fxMaterial, int passNr)

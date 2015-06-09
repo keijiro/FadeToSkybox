@@ -185,11 +185,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 51294604eecc744aaaeed867abbe4722, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  distanceFog: 1
-  useRadialDistance: 0
-  heightFog: 1
-  height: 1
-  heightDensity: 2
+  useRadialDistance: 1
   startDistance: 5
   fogShader: {fileID: 4800000, guid: 376b37dc54c6f4482a3f4147e23fedb6, type: 3}
 --- !u!114 &270859229
@@ -204,8 +200,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   distanceFog: 1
-  useRadialDistance: 0
-  heightFog: 1
+  useRadialDistance: 1
+  heightFog: 0
   height: 1
   heightDensity: 2
   startDistance: 5
