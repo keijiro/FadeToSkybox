@@ -3,9 +3,9 @@ Shader "Hidden/FadeToSkybox"
     Properties
     {
         _MainTex ("-", 2D) = "black" {}
-        _Tint ("-", Color) = (.5, .5, .5, .5)
-        [Gamma] _Exposure ("-", Range(0, 8)) = 1.0
-        [NoScaleOffset] _Cubemap ("-", Cube) = "grey" {}
+        _SkyTint ("-", Color) = (.5, .5, .5, .5)
+        [Gamma] _SkyExposure ("-", Range(0, 8)) = 1.0
+        [NoScaleOffset] _SkyCubemap ("-", Cube) = "grey" {}
     }
 
     CGINCLUDE
@@ -27,12 +27,12 @@ Shader "Hidden/FadeToSkybox"
     uniform float4x4 _FrustumCornersWS;
     uniform float4 _CameraWS;
 
-    samplerCUBE _Cubemap;
-    half4 _Cubemap_HDR;
+    samplerCUBE _SkyCubemap;
+    half4 _SkyCubemap_HDR;
 
-    half4 _Tint;
-    half _Exposure;
-    float _Rotation;
+    half4 _SkyTint;
+    half _SkyExposure;
+    float _SkyRotation;
 
     float4 RotateAroundYInDegrees (float4 vertex, float degrees)
     {
@@ -64,7 +64,7 @@ Shader "Hidden/FadeToSkybox"
             o.uv.y = 1-o.uv.y;
         #endif
 
-        o.interpolatedRay = RotateAroundYInDegrees(_FrustumCornersWS[(int)index], -_Rotation);
+        o.interpolatedRay = RotateAroundYInDegrees(_FrustumCornersWS[(int)index], -_SkyRotation);
         o.interpolatedRay.w = index;
 
         return o;
@@ -114,10 +114,10 @@ Shader "Hidden/FadeToSkybox"
         float4 wsDir = dpth * i.interpolatedRay;
         float4 wsPos = _CameraWS + wsDir;
 
-        half4 skyTex = texCUBE (_Cubemap, wsDir);
-        half3 skyColor = DecodeHDR (skyTex, _Cubemap_HDR);
-        skyColor *= _Tint.rgb * unity_ColorSpaceDouble;
-        skyColor *= _Exposure;
+        half4 skyTex = texCUBE (_SkyCubemap, wsDir);
+        half3 skyColor = DecodeHDR (skyTex, _SkyCubemap_HDR);
+        skyColor *= _SkyTint.rgb * unity_ColorSpaceDouble;
+        skyColor *= _SkyExposure;
 
         // Compute fog distance
         float g = ComputeDistance(wsDir, dpth) - _DistanceOffset;

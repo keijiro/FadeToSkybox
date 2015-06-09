@@ -111,11 +111,12 @@ class FadeToSkybox : UnityStandardAssets.ImageEffects.PostEffectsBase
         else
             fogMaterial.DisableKeyword("RADIAL_DIST");
 
+        // Transfer the skybox parameters.
         var skybox = RenderSettings.skybox;
-        fogMaterial.SetColor ("_Tint", skybox.GetColor("_Tint"));
-        fogMaterial.SetFloat ("_Exposure", skybox.GetFloat("_Exposure"));
-        fogMaterial.SetFloat ("_Rotation", skybox.GetFloat("_Rotation"));
-        fogMaterial.SetTexture ("_Cubemap", skybox.GetTexture("_Tex"));
+        fogMaterial.SetColor ("_SkyTint", skybox.GetColor("_Tint"));
+        fogMaterial.SetFloat ("_SkyExposure", skybox.GetFloat("_Exposure"));
+        fogMaterial.SetFloat ("_SkyRotation", skybox.GetFloat("_Rotation"));
+        fogMaterial.SetTexture ("_SkyCubemap", skybox.GetTexture("_Tex"));
 
         CustomGraphicsBlit (source, destination, fogMaterial, 0);
     }
