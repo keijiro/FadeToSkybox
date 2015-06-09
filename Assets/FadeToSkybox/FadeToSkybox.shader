@@ -1,29 +1,25 @@
-Shader "Hidden/FadeToSkybox" {
-Properties {
-    _Tint ("Tint Color", Color) = (.5, .5, .5, .5)
-    _MainTex ("Base (RGB)", 2D) = "black" {}
-    [Gamma] _Exposure ("Exposure", Range(0, 8)) = 1.0
-    [NoScaleOffset] _Cubemap ("Cubemap", Cube) = "grey" {}
-}
+Shader "Hidden/FadeToSkybox"
+{
+    Properties
+    {
+        _MainTex ("-", 2D) = "black" {}
+        _Tint ("-", Color) = (.5, .5, .5, .5)
+        [Gamma] _Exposure ("-", Range(0, 8)) = 1.0
+        [NoScaleOffset] _Cubemap ("-", Cube) = "grey" {}
+    }
 
-CGINCLUDE
+    CGINCLUDE
 
     #include "UnityCG.cginc"
 
-    uniform sampler2D _MainTex;
-    uniform sampler2D_float _CameraDepthTexture;
+    sampler2D _MainTex;
+    float4 _MainTex_TexelSize;
 
-    // x = start distance
-    uniform float4 _DistanceParams;
+    sampler2D_float _CameraDepthTexture;
 
+    float _DistanceOffset;
     int4 _SceneFogMode; // x = fog mode, y = use radial flag
     float4 _SceneFogParams;
-    #ifndef UNITY_APPLY_FOG
-    half4 unity_FogColor;
-    half4 unity_FogDensity;
-    #endif
-
-    uniform float4 _MainTex_TexelSize;
 
     // for fast world space reconstruction
     uniform float4x4 _FrustumCornersWS;
@@ -31,6 +27,7 @@ CGINCLUDE
 
     samplerCUBE _Cubemap;
     half4 _Cubemap_HDR;
+
     half4 _Tint;
     half _Exposure;
     float _Rotation;
@@ -125,36 +122,31 @@ CGINCLUDE
         skyColor *= _Exposure;
 
         // Compute fog distance
-        float g = _DistanceParams.x;
-        g += ComputeDistance (wsDir, dpth);
+        float g = ComputeDistance(wsDir, dpth) - _DistanceOffset;
 
         // Compute fog amount
         half fogFac = ComputeFogFactor (max(0.0,g));
         // Do not fog skybox
         if (rawDepth >= 0.999999)
             fogFac = 1.0;
-        //return fogFac; // for debugging
 
         // Lerp between fog color & original scene color
         // by fog amount
         return lerp (half4(skyColor, 1), sceneColor, fogFac);
-        //return lerp (unity_FogColor, sceneColor, fogFac);
     }
 
-ENDCG
+    ENDCG
 
-SubShader
-{
-    ZTest Always Cull Off ZWrite Off
-    Pass
+    SubShader
     {
-        CGPROGRAM
-        #pragma vertex vert
-        #pragma fragment frag
-        ENDCG
+        ZTest Always Cull Off ZWrite Off
+        Pass
+        {
+            CGPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+            ENDCG
+        }
     }
-}
-
-Fallback off
-
+    Fallback off
 }

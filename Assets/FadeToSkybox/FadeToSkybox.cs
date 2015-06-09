@@ -74,7 +74,7 @@ class FadeToSkybox : UnityStandardAssets.ImageEffects.PostEffectsBase
         var camPos= camtr.position;
         fogMaterial.SetMatrix ("_FrustumCornersWS", frustumCorners);
         fogMaterial.SetVector ("_CameraWS", camPos);
-        fogMaterial.SetVector ("_DistanceParams", new Vector4 (-Mathf.Max(startDistance,0.0f), 0, 0, 0));
+        fogMaterial.SetFloat ("_DistanceOffset", Mathf.Max(startDistance, 0.0f));
 
         var sceneMode= RenderSettings.fogMode;
         var sceneDensity= RenderSettings.fogDensity;
