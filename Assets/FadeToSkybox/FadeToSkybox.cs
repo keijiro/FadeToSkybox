@@ -71,10 +71,10 @@ public class FadeToSkybox : MonoBehaviour
         var scale = v_tl.magnitude * far / near;
 
         var m = Matrix4x4.identity;
-        m.SetRow (0, v_tl.normalized * scale);
-        m.SetRow (1, v_tr.normalized * scale);
-        m.SetRow (2, v_br.normalized * scale);
-        m.SetRow (3, v_bl.normalized * scale);
+        m.SetRow(0, v_tl.normalized * scale);
+        m.SetRow(1, v_tr.normalized * scale);
+        m.SetRow(2, v_br.normalized * scale);
+        m.SetRow(3, v_bl.normalized * scale);
         return m;
     }
 
@@ -136,7 +136,7 @@ public class FadeToSkybox : MonoBehaviour
         _fogMaterial.SetTexture("_SkyCubemap", skybox.GetTexture("_Tex"));
         _fogMaterial.SetColor("_SkyTint", skybox.GetColor("_Tint"));
         _fogMaterial.SetFloat("_SkyExposure", skybox.GetFloat("_Exposure"));
-        _fogMaterial.SetFloat ("_SkyRotation", skybox.GetFloat("_Rotation"));
+        _fogMaterial.SetFloat("_SkyRotation", skybox.GetFloat("_Rotation"));
 
         // Draw screen quad.
         _fogMaterial.SetTexture("_MainTex", source);
@@ -148,17 +148,17 @@ public class FadeToSkybox : MonoBehaviour
         GL.LoadOrtho();
         GL.Begin(GL.QUADS);
 
-        GL.MultiTexCoord2(0, 0.0f, 0.0f);
-        GL.Vertex3(0.0f, 0.0f, 3.0f); // BL
+        GL.MultiTexCoord2(0, 0, 0);
+        GL.Vertex3(0, 0, 3);
 
-        GL.MultiTexCoord2(0, 1.0f, 0.0f);
-        GL.Vertex3(1.0f, 0.0f, 2.0f); // BR
+        GL.MultiTexCoord2(0, 1, 0);
+        GL.Vertex3(1, 0, 2);
 
-        GL.MultiTexCoord2(0, 1.0f, 1.0f);
-        GL.Vertex3(1.0f, 1.0f, 1.0f); // TR
+        GL.MultiTexCoord2(0, 1, 1);
+        GL.Vertex3(1, 1, 1);
 
-        GL.MultiTexCoord2(0, 0.0f, 1.0f);
-        GL.Vertex3(0.0f, 1.0f, 0.0f); // TL
+        GL.MultiTexCoord2(0, 0, 1);
+        GL.Vertex3(0, 1, 0);
 
         GL.End();
         GL.PopMatrix();
