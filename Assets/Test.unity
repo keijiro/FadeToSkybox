@@ -19,7 +19,7 @@ RenderSettings:
   m_FogMode: 2
   m_FogDensity: .0799999982
   m_LinearFogStart: 0
-  m_LinearFogEnd: 80
+  m_LinearFogEnd: 15.6000004
   m_AmbientSkyColor: {r: .211999997, g: .226999998, b: .259000003, a: 1}
   m_AmbientEquatorColor: {r: .114, g: .125, b: .133000001, a: 1}
   m_AmbientGroundColor: {r: .0469999984, g: .0430000015, b: .0350000001, a: 1}
@@ -185,9 +185,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 51294604eecc744aaaeed867abbe4722, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  useRadialDistance: 1
-  startDistance: 5
-  fogShader: {fileID: 4800000, guid: 376b37dc54c6f4482a3f4147e23fedb6, type: 3}
+  _useRadialDistance: 1
+  _startDistance: 5
+  _fogShader: {fileID: 4800000, guid: 376b37dc54c6f4482a3f4147e23fedb6, type: 3}
 --- !u!114 &270859229
 MonoBehaviour:
   m_ObjectHideFlags: 0
