@@ -19,11 +19,16 @@ public class FadeToSkyboxEditor : Editor
 
     public override void OnInspectorGUI()
     {
-        serializedObject.Update();
-
-        EditorGUILayout.PropertyField(_useRadialDistance);
-        EditorGUILayout.PropertyField(_startDistance);
-
-        serializedObject.ApplyModifiedProperties();
+        if (FadeToSkybox.CheckSkybox())
+        {
+            serializedObject.Update();
+            EditorGUILayout.PropertyField(_useRadialDistance);
+            EditorGUILayout.PropertyField(_startDistance);
+            serializedObject.ApplyModifiedProperties();
+        }
+        else
+        {
+            EditorGUILayout.HelpBox("This component only supports cubed skyboxes.", MessageType.Warning);
+        }
     }
 }

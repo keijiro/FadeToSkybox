@@ -16,7 +16,7 @@ public class FadeToSkybox : MonoBehaviour
 
     #endregion
 
-    #region Public Properties
+    #region Public Properties And Functions
 
     public bool useRadialDistance {
         get { return _useRadialDistance; }
@@ -26,6 +26,16 @@ public class FadeToSkybox : MonoBehaviour
     public float startDistance {
         get { return _startDistance; }
         set { _startDistance = value; }
+    }
+
+    public static bool CheckSkybox()
+    {
+        var skybox = RenderSettings.skybox;
+        return skybox != null &&
+               skybox.HasProperty("_Tex") &&
+               skybox.HasProperty("_Tint") &&
+               skybox.HasProperty("_Exposure") &&
+               skybox.HasProperty("_Rotation");
     }
 
     #endregion
@@ -63,6 +73,13 @@ public class FadeToSkybox : MonoBehaviour
     [ImageEffectOpaque]
     void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
+        if (!CheckSkybox())
+        {
+            // The current skybox isn't cubed one.
+            Graphics.Blit(source, destination);
+            return;
+        }
+
         SanitizeParameters();
 
         Setup();
