@@ -1,11 +1,10 @@
 fileFormatVersion: 2
-guid: 51294604eecc744aaaeed867abbe4722
-timeCreated: 1433940943
+guid: 0e909fae0808a4cbe9e6c4aed54ab311
+timeCreated: 1433941013
 licenseType: Pro
 MonoImporter:
   serializedVersion: 2
-  defaultReferences:
-  - _fogShader: {fileID: 4800000, guid: 376b37dc54c6f4482a3f4147e23fedb6, type: 3}
+  defaultReferences: []
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

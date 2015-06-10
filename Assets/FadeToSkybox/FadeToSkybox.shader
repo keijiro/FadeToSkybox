@@ -21,7 +21,9 @@ Shader "Hidden/FadeToSkybox"
     sampler2D_float _CameraDepthTexture;
 
     float _DistanceOffset;
-    float4 _SceneFogParams;
+    float _Density;
+    float _LinearGrad;
+    float _LinearOffs;
 
     // for fast world space reconstruction
     float4x4 _FrustumCornersWS;
@@ -78,14 +80,14 @@ Shader "Hidden/FadeToSkybox"
         float fog = 0.0;
     #if FOG_LINEAR
         // factor = (end-z)/(end-start) = z * (-1/(end-start)) + (end/(end-start))
-        fog = coord * _SceneFogParams.z + _SceneFogParams.w;
+        fog = coord * _LinearGrad + _LinearOffs;
     #elif FOG_EXP
         // factor = exp(-density*z)
-        fog = _SceneFogParams.y * coord;
+        fog = _Density * coord;
         fog = exp2(-fog);
     #else // FOG_EXP2
         // factor = exp(-(density*z)^2)
-        fog = _SceneFogParams.x * coord;
+        fog = _Density * coord;
         fog = exp2(-fog * fog);
     #endif
         return saturate(fog);
