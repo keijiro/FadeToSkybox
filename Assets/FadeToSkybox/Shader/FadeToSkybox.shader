@@ -20,13 +20,11 @@ Shader "Hidden/FadeToSkybox"
 
     sampler2D_float _CameraDepthTexture;
 
+    float4x4 _FrustumCorners;
     float _DistanceOffset;
     float _Density;
     float _LinearGrad;
     float _LinearOffs;
-
-    // for fast world space reconstruction
-    float4x4 _FrustumCornersWS;
 
     // Skybox information
     samplerCUBE _SkyCubemap;
@@ -67,7 +65,7 @@ Shader "Hidden/FadeToSkybox"
         if (_MainTex_TexelSize.y < 0.0) o.uv.y = 1.0 - o.uv.y;
     #endif
 
-        o.interpolatedRay = _FrustumCornersWS[(int)index];
+        o.interpolatedRay = _FrustumCorners[(int)index];
         o.interpolatedRay = RotateAroundYAxis(o.interpolatedRay, -_SkyRotation);
         o.interpolatedRay.w = index;
 

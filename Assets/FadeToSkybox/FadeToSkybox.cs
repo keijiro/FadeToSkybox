@@ -95,7 +95,7 @@ public class FadeToSkybox : MonoBehaviour
         Setup();
 
         // Set up fog parameters.
-        _fogMaterial.SetMatrix("_FrustumCornersWS", CalculateFrustumCorners());
+        _fogMaterial.SetMatrix("_FrustumCorners", CalculateFrustumCorners());
         _fogMaterial.SetFloat("_DistanceOffset", _startDistance);
 
         var mode = RenderSettings.fogMode;
