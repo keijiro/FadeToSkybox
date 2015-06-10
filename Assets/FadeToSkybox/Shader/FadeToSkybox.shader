@@ -20,7 +20,6 @@ Shader "Hidden/FadeToSkybox"
 
     sampler2D_float _CameraDepthTexture;
 
-    float4x4 _FrustumCorners;
     float _DistanceOffset;
     float _Density;
     float _LinearGrad;
@@ -50,23 +49,18 @@ Shader "Hidden/FadeToSkybox"
         return float3(mul(m, v.xz), v.y).xzy;
     }
 
-    v2f vert(appdata_img v)
+    v2f vert(appdata_full v)
     {
-        half index = v.vertex.z;
-
         v2f o;
 
-        v.vertex.z = 0.1;
         o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
         o.uv = v.texcoord.xy;
         o.uv_depth = v.texcoord.xy;
+        o.ray = RotateAroundYAxis(v.texcoord1.xyz, -_SkyRotation);
 
     #if UNITY_UV_STARTS_AT_TOP
         if (_MainTex_TexelSize.y < 0.0) o.uv.y = 1.0 - o.uv.y;
     #endif
-
-        o.ray = _FrustumCorners[(int)index].xyz;
-        o.ray = RotateAroundYAxis(o.ray, -_SkyRotation);
 
         return o;
     }

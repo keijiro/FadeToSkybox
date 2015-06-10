@@ -51,33 +51,6 @@ public class FadeToSkybox : MonoBehaviour
         _startDistance = Mathf.Max(_startDistance, 0.0f);
     }
 
-    Matrix4x4 CalculateFrustumCorners()
-    {
-        var c = GetComponent<Camera>();
-        var t = c.transform;
-
-        var near = c.nearClipPlane;
-        var far = c.farClipPlane;
-
-        var tanHalfFov = Mathf.Tan(c.fieldOfView * Mathf.Deg2Rad / 2);
-        var toRight = t.right * near * tanHalfFov * c.aspect;
-        var toTop = t.up * near * tanHalfFov;
-
-        var v_tl = t.forward * near - toRight + toTop;
-        var v_tr = t.forward * near + toRight + toTop;
-        var v_br = t.forward * near + toRight - toTop;
-        var v_bl = t.forward * near - toRight - toTop;
-
-        var scale = v_tl.magnitude * far / near;
-
-        var m = Matrix4x4.identity;
-        m.SetRow(0, v_tl.normalized * scale);
-        m.SetRow(1, v_tr.normalized * scale);
-        m.SetRow(2, v_br.normalized * scale);
-        m.SetRow(3, v_bl.normalized * scale);
-        return m;
-    }
-
     #endregion
 
     #region Monobehaviour Functions
@@ -95,7 +68,6 @@ public class FadeToSkybox : MonoBehaviour
         Setup();
 
         // Set up fog parameters.
-        _fogMaterial.SetMatrix("_FrustumCorners", CalculateFrustumCorners());
         _fogMaterial.SetFloat("_DistanceOffset", _startDistance);
 
         var mode = RenderSettings.fogMode;
@@ -138,6 +110,23 @@ public class FadeToSkybox : MonoBehaviour
         _fogMaterial.SetFloat("_SkyExposure", skybox.GetFloat("_Exposure"));
         _fogMaterial.SetFloat("_SkyRotation", skybox.GetFloat("_Rotation"));
 
+        // Calculate vectors towards frustum corners.
+        var cam = GetComponent<Camera>();
+        var camtr = cam.transform;
+        var camNear = cam.nearClipPlane;
+        var camFar = cam.farClipPlane;
+
+        var tanHalfFov = Mathf.Tan(cam.fieldOfView * Mathf.Deg2Rad / 2);
+        var toRight = camtr.right * camNear * tanHalfFov * cam.aspect;
+        var toTop = camtr.up * camNear * tanHalfFov;
+
+        var v_tl = camtr.forward * camNear - toRight + toTop;
+        var v_tr = camtr.forward * camNear + toRight + toTop;
+        var v_br = camtr.forward * camNear + toRight - toTop;
+        var v_bl = camtr.forward * camNear - toRight - toTop;
+
+        var v_s = v_tl.magnitude * camFar / camNear;
+
         // Draw screen quad.
         _fogMaterial.SetTexture("_MainTex", source);
         _fogMaterial.SetPass(0);
@@ -149,16 +138,20 @@ public class FadeToSkybox : MonoBehaviour
         GL.Begin(GL.QUADS);
 
         GL.MultiTexCoord2(0, 0, 0);
-        GL.Vertex3(0, 0, 3);
+        GL.MultiTexCoord(1, v_bl.normalized * v_s);
+        GL.Vertex3(0, 0, 0.1f);
 
         GL.MultiTexCoord2(0, 1, 0);
-        GL.Vertex3(1, 0, 2);
+        GL.MultiTexCoord(1, v_br.normalized * v_s);
+        GL.Vertex3(1, 0, 0.1f);
 
         GL.MultiTexCoord2(0, 1, 1);
-        GL.Vertex3(1, 1, 1);
+        GL.MultiTexCoord(1, v_tr.normalized * v_s);
+        GL.Vertex3(1, 1, 0.1f);
 
         GL.MultiTexCoord2(0, 0, 1);
-        GL.Vertex3(0, 1, 0);
+        GL.MultiTexCoord(1, v_tl.normalized * v_s);
+        GL.Vertex3(0, 1, 0.1f);
 
         GL.End();
         GL.PopMatrix();
