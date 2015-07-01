@@ -145,10 +145,10 @@ public class FadeToSkybox : MonoBehaviour
         var v_s = v_tl.magnitude * camFar / camNear;
 
         // Draw screen quad.
+        RenderTexture.active = destination;
+
         _fogMaterial.SetTexture("_MainTex", source);
         _fogMaterial.SetPass(0);
-
-        RenderTexture.active = destination;
 
         GL.PushMatrix();
         GL.LoadOrtho();
