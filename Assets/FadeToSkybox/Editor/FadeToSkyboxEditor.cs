@@ -19,16 +19,26 @@ public class FadeToSkyboxEditor : Editor
 
     public override void OnInspectorGUI()
     {
-        if (FadeToSkybox.CheckSkybox())
+        bool componentSupported = true;
+
+        if (!FadeToSkybox.CheckSkybox())
+        {
+            EditorGUILayout.HelpBox("This component only supports cubed skyboxes.", MessageType.Warning);
+            componentSupported = false;
+        }
+
+        if (!RenderSettings.fog)
+        {
+            EditorGUILayout.HelpBox("This component requires fog to be enabled (Window -> Lighting -> Fog).", MessageType.Warning);
+            componentSupported = false;
+        }
+
+        if (componentSupported)
         {
             serializedObject.Update();
             EditorGUILayout.PropertyField(_useRadialDistance);
             EditorGUILayout.PropertyField(_startDistance);
             serializedObject.ApplyModifiedProperties();
-        }
-        else
-        {
-            EditorGUILayout.HelpBox("This component only supports cubed skyboxes.", MessageType.Warning);
         }
     }
 }

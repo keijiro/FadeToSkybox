@@ -30,6 +30,7 @@ public class FadeToSkybox : MonoBehaviour
 
     public static bool CheckSkybox()
     {
+        // Check for cubed skybox
         var skybox = RenderSettings.skybox;
         return skybox != null &&
                skybox.HasProperty("_Tex") &&
@@ -73,9 +74,9 @@ public class FadeToSkybox : MonoBehaviour
     [ImageEffectOpaque]
     void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
-        if (!CheckSkybox())
+        if (!CheckSkybox() || 
+            !RenderSettings.fog)
         {
-            // The current skybox isn't cubed one.
             Graphics.Blit(source, destination);
             return;
         }
