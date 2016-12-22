@@ -1,9 +1,12 @@
-This Repo is Deprecated! Use KinoFog!
--------------------------------------
+This repo is deprecated! Use [KinoFog][Kino]!
+---------------------------------------------
 
-This repository was used for experimental purposes, and its fade-to-skybox functionality has
-been merged to [KinoFog](https://github.com/keijiro/KinoFog). I've stopped updating this
-repository, and thus it's recommended to use KinoFog instead of this when you need its functionality.
+This repository had been used for experimental purposes, and its fade-to-skybox
+functionality has been merged to [KinoFog][Kino]. I've stopped updating this
+repository, and thus it's recommended to use KinoFog instead of this when you
+need its functionality.
+
+[Kino]: https://github.com/keijiro/KinoFog
 
 FedeToSkybox - Description
 --------------------------
