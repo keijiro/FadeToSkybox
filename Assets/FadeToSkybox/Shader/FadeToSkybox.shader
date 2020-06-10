@@ -102,10 +102,10 @@ Shader "Hidden/FadeToSkybox"
 
     half4 frag(v2f i) : SV_Target
     {
-        half4 sceneColor = tex2D(_MainTex, i.uv);
+        half4 sceneColor = tex2D(_MainTex,  UnityStereoTransformScreenSpaceTex(i.uv) );
 
         // Reconstruct world space position & direction towards this screen pixel.
-        float depth = Linear01Depth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uv_depth));
+        float depth = Linear01Depth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture,UnityStereoTransformScreenSpaceTex(i.uv_depth)));
 
         // Look up the skybox color.
         half3 skyColor = DecodeHDR(texCUBE(_SkyCubemap, i.ray), _SkyCubemap_HDR);
